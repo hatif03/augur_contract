@@ -82,4 +82,45 @@ contract SimplePredictionMarket is Ownable, ReentrancyGuard {
 
         return marketId;
     }
+
+    function buyShares(
+        uint256 _marketId,
+        bool _isOptionA,
+        uint256 _amount
+    ) external {
+        Market storage market = markets[_marketId];
+        require(
+            block.timestamp < market.endTime, "Market trading perios has ended"
+        );
+        require(!market.resolved, "Market already resolved");
+        require(_amount > 0, "Amount must be positive");
+        require(
+            bettingToken.transferFrom(msg.sender, address(this), _amount),
+            "Token transfer failed"
+        );
+
+        if (_isOptionA) {
+            market.optionASharesBalance[msg.sender] += _amount;
+            market.totalOptionAShares += _amount;
+        } else {
+            market.optionBSharesBalance[msg.sender] += _amount;
+            market.totalOptionBShares += _amount;
+        }
+
+        emit SharesPurchased(_marketId, msg.sender, _isOptionA, _amount);
+    }
+
+    function resolveMarket(uint256 _marketId, MarketOutcome _outcome) external{
+        require(msg.sender == owner(), "Only owner can resolve markets");
+        Market storage market = markets[_marketId];
+        require(block.timestamp >= market.endTime, "Market hasn't ended yet");
+        require(!market.resolved, "Market already resolved");
+        require(_outcome != MarketOutcome.UNRESOLVED, "Invalid outcome");
+
+        market.outcome = _outcome;
+        market.resolved = true;
+
+        emit MarketResolved(_marketId, _outcome);
+    }
+
 }
