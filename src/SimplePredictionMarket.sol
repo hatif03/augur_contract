@@ -52,6 +52,10 @@ contract SimplePredictionMarket is Ownable, ReentrancyGuard {
         uint256 amount
     );
 
+    function _canSetOwner() internal view virtual override returns (bool) {
+        return msg.sender == owner();
+    }
+
     constructor(address _bettingToken) {
         bettingToken = IERC20(_bettingToken);
         _setupOwner(msg.sender); // set the contract deployer as the owner
@@ -160,6 +164,46 @@ contract SimplePredictionMarket is Ownable, ReentrancyGuard {
 
         emit Claimed(_marketId, msg.sender, winnings);
 
+    }
+
+    function getMarketInfo(
+        uint256 _marketId
+    )
+        external
+        view
+        returns (
+            string memory question,
+            string memory optionA,
+            string memory optionB,
+            uint256 endTime,
+            MarketOutcome outcome,
+            uint256 totalOptionAShares,
+            uint256 totalOptionBShares,
+            bool resolved
+        )
+    {
+        Market storage market = markets[_marketId];
+        return(
+            market.question,
+            market.optionA,
+            market.optionB,
+            market.endTime,
+            market.outcome,
+            market.totalOptionAShares,
+            market.totalOptionBShares,
+            market.resolved
+        );
+    }
+
+    function getSharesBalance(
+        uint256 _marketId,
+        address _user
+    ) external view returns (uint256 optionAShares, uint256 optionBShares) {
+        Market storage market = markets[_marketId];
+        return(
+            market.optionASharesBalance[_user],
+            market.optionBSharesBalance[_user]
+        );
     }
 
 }
