@@ -129,7 +129,7 @@ contract SimplePredictionMarket is Ownable, ReentrancyGuard {
 
     function claimWinnings(uint256 _marketId) external {
         Market storage market = markets[_marketId];
-        require(market.resolved, "Market not resolved yet");;
+        require(market.resolved, "Market not resolved yet");
 
         uint256 userShares;
         uint256 winningShares;
