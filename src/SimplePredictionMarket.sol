@@ -23,6 +23,8 @@ contract SimplePredictionMarket is Ownable, ReentrancyGuard {
         bool resolved;
         mapping(address => uint256) optionASharesBalance;
         mapping(address => uint256) optionBSharesBalance;
+
+        mapping(address => bool) hasClaimed;
     }
 
     IERC20 public bettingToken;
@@ -94,7 +96,7 @@ contract SimplePredictionMarket is Ownable, ReentrancyGuard {
     ) external {
         Market storage market = markets[_marketId];
         require(
-            block.timestamp < market.endTime, "Market trading perios has ended"
+            block.timestamp < market.endTime, "Market trading period has ended"
         );
         require(!market.resolved, "Market already resolved");
         require(_amount > 0, "Amount must be positive");
